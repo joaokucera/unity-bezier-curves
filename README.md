@@ -12,6 +12,6 @@ This repository has a way to create and edit beziér splines.
 6. Supports free, aligned, and mirrored control points;
 7. Move and place objects along a spline.
 
-##### Change Log #####
+#### Change Log ####
 
 1.0.0 - Lines, curves and splines.
