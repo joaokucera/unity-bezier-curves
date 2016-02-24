@@ -15,6 +15,12 @@ namespace DoisMundos.BezierCurves
 		[SerializeField] private BezierControlPointMode[] modes;
 		[SerializeField] private bool loop;
 
+		public bool IsEmpty { get { return points.Length == 0; } }
+		public bool IsThereAPath { get { return points.Length > 3; } }
+
+		public int CurveCount { get { return (points.Length - 1) / 3; } }
+		public int ControlPointCount { get { return points.Length; } }
+
 		public bool Loop {
 			get {
 				return loop;
@@ -28,21 +34,12 @@ namespace DoisMundos.BezierCurves
 			}
 		}
 
-		public int CurveCount { get { return (points.Length - 1) / 3; } }
-		public int ControlPointCount { get { return points.Length; } }
-
 		public void Awake() {
 			Reset ();
 		}
 
 		public void Reset() {
 			points = new Vector3[] {};
-//			points = new Vector3[] {
-//				new Vector3 (1f, 0f, 0f),
-//				new Vector3 (2f, 0f, 0f),
-//				new Vector3 (3f, 0f, 0f),
-//				new Vector3 (4f, 0f, 0f)
-//			};
 			modes = new BezierControlPointMode[] {
 				BezierControlPointMode.Free,
 				BezierControlPointMode.Free
@@ -51,6 +48,16 @@ namespace DoisMundos.BezierCurves
 
 		public Vector3 GetControlPoint(int index) { return points [index]; }
 		public BezierControlPointMode GetControlPointMode(int index) { return modes[(index + 1) / 3]; }
+
+		public void DoBeforeSetControlPoint ()
+		{
+			Debug.LogWarning ("Do what you need before changing any point!");
+		}
+
+		public void DoAfterSetControlPoint ()
+		{
+			Debug.LogWarning ("Do what you need after changing any point!");
+		}
 
 		public void SetControlPoint(int index, Vector3 point) {
 			if (index % 3 == 0) {
@@ -139,29 +146,33 @@ namespace DoisMundos.BezierCurves
 			points [enforcedIndex] = middle + enforcedTangent;
 		}
 
-		public void AddCurve() {
-			Vector3 point = points [points.Length - 1];
-			Array.Resize (ref points, points.Length + 3);
-			point.x += 1f;
-			points [points.Length - 3] = point;
-			point.x += 1f;
-			points [points.Length - 2] = point;
-			point.x += 1f;
-			points [points.Length - 1] = point;
-
-			Array.Resize (ref modes, modes.Length + 1);
-			modes [modes.Length - 1] = modes [modes.Length - 2];
-			EnforceMode (points.Length - 4);
-
-			if (loop) {
-				points[points.Length - 1] = points[0];
-				modes[modes.Length - 1] = modes[0];
-				EnforceMode(0);
-			}
-		}
+//		public void AddCurve() {
+//			Vector3 point = points [points.Length - 1];
+//			Array.Resize (ref points, points.Length + 3);
+//			point.x += 1f;
+//			points [points.Length - 3] = point;
+//			point.x += 1f;
+//			points [points.Length - 2] = point;
+//			point.x += 1f;
+//			points [points.Length - 1] = point;
+//
+//			Array.Resize (ref modes, modes.Length + 1);
+//			modes [modes.Length - 1] = modes [modes.Length - 2];
+//			EnforceMode (points.Length - 4);
+//
+//			if (loop) {
+//				points[points.Length - 1] = points[0];
+//				modes[modes.Length - 1] = modes[0];
+//				EnforceMode(0);
+//			}
+//		}
 
 		public void AddCurve(Vector3 endPoint) {
-			if (ControlPointCount > 0) {
+			if (IsEmpty) {
+				Array.Resize (ref points, 1);
+				points[0] = endPoint;
+			}
+			else {
 				Vector3 startPoint = points [points.Length - 1];
 				Array.Resize (ref points, points.Length + 3);
 
@@ -169,22 +180,16 @@ namespace DoisMundos.BezierCurves
 				points [points.Length - 3] = (middlePoint + startPoint) / 2;
 				points [points.Length - 2] = (endPoint + middlePoint) / 2;
 				points [points.Length - 1] = endPoint;
-			}
-			else {
-				Array.Resize (ref points, points.Length + 4);
-				for (int i = 0; i < 4; i++) {
-					points[i] = endPoint;
-				}
-			}
 
-			Array.Resize (ref modes, modes.Length + 1);
-			modes [modes.Length - 1] = modes [modes.Length - 2];
-			EnforceMode (points.Length - 4);
-			
-			if (loop) {
-				points[points.Length - 1] = points[0];
-				modes[modes.Length - 1] = modes[0];
-				EnforceMode(0);
+				Array.Resize (ref modes, modes.Length + 1);
+				modes [modes.Length - 1] = modes [modes.Length - 2];
+				EnforceMode (points.Length - 4);
+
+				if (loop) {
+					points[points.Length - 1] = points[0];
+					modes[modes.Length - 1] = modes[0];
+					EnforceMode(0);
+				}
 			}
 		}
 

@@ -5,9 +5,9 @@ namespace DoisMundos.BezierCurves
 {
 	public class BezierHandler : MonoBehaviour 
 	{
-		public SplineWalker walker;
 		public SplineDecorator decorator;
 		public SplineString splineString;
+		public SplineWalker walker;
 
 		public BezierSpline spline;
 		public LayerMask mask;
@@ -19,9 +19,11 @@ namespace DoisMundos.BezierCurves
 				if (Physics.Raycast(ray, out hit, float.MaxValue, mask)) {
 					spline.AddCurve(hit.point);
 
-					walker.DoUpdate();
-					decorator.DoUpdate();
-					splineString.DoUpdate();
+					if (spline.IsThereAPath) {
+						if (decorator != null) decorator.DoUpdate();
+						if (splineString != null) splineString.DoUpdate();
+						if (walker != null) { walker.DoUpdate(); }
+					}
 				}
 			}
 		}

@@ -23,11 +23,11 @@ namespace DoisMundos.BezierCurves
 			meshRenderer = GetComponent<MeshRenderer> ();
 		}
 
-		public void DoUpdate () {
-			meshRenderer.enabled = spline.ControlPointCount > 3;
-		}
+		public void Update() {
+			if (!spline.IsThereAPath) {
+				return;
+			}
 
-		private void Update() {
 			if (goingFoward) {
 				progress += Time.deltaTime / duration;
 				if (progress > 1f) {
@@ -51,15 +51,15 @@ namespace DoisMundos.BezierCurves
 				}
 			}
 
-			if (spline.ControlPointCount == 0) {
-				return;
-			}
-
 			Vector3 position = spline.GetPoint (progress);
 			transform.localPosition = position;
 			if (lookFoward) {
 				transform.LookAt(position + spline.GetDirection(progress));
 			}
+		}
+		
+		public void DoUpdate () {
+			meshRenderer.enabled = spline.IsThereAPath;
 		}
 	}
 }

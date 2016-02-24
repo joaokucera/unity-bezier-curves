@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 namespace DoisMundos.BezierCurves
 {
@@ -15,7 +14,7 @@ namespace DoisMundos.BezierCurves
 		}
 
 		public void DoUpdate() {
-			if (spline.ControlPointCount == 0) {
+			if (spline.IsEmpty) {
 				return;
 			}
 

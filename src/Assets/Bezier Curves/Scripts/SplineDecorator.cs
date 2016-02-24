@@ -14,7 +14,7 @@ namespace DoisMundos.BezierCurves
 		}
 
 		public void DoUpdate() {
-			if (frequency <= 0 || items == null || items.Length == 0 || spline.ControlPointCount == 0) {
+			if (frequency <= 0 || items == null || items.Length == 0 || !spline.IsThereAPath) {
 				return;
 			}
 			

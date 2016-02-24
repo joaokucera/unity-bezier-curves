@@ -22,7 +22,6 @@ namespace DoisMundos.BezierCurves
 		private Transform handleTransform;
 		private Quaternion handleRotation;
 		private int selectedIndex = -1;
-
 		private SplineString splineString;
 
 		public void OnEnable() {
@@ -30,48 +29,51 @@ namespace DoisMundos.BezierCurves
 		}
 
 		public override void OnInspectorGUI () {
+//			DrawDefaultInspector ();
 			spline = target as BezierSpline;
 
-			EditorGUI.BeginChangeCheck ();
-			bool loop = EditorGUILayout.Toggle ("Loop", spline.Loop);
-			if (EditorGUI.EndChangeCheck ()) {
-				Undo.RecordObject(spline, "Toggle Loop");
-				EditorUtility.SetDirty(spline);
-				spline.Loop = loop;
-			}
+//			EditorGUI.BeginChangeCheck ();
+//			bool loop = EditorGUILayout.Toggle ("Loop", spline.Loop);
+//			if (EditorGUI.EndChangeCheck ()) {
+//				Undo.RecordObject(spline, "Toggle Loop");
+//				EditorUtility.SetDirty(spline);
+//				spline.Loop = loop;
+//			}
 
-			if (selectedIndex >= 0 && selectedIndex < spline.ControlPointCount && spline.ControlPointCount > 3) {
+			if (selectedIndex >= 0 && selectedIndex < spline.ControlPointCount && !spline.IsEmpty) {
 				DrawSelectedPointInspector();
 			}
-			if (GUILayout.Button ("Add Curve")) {
-				Undo.RecordObject(spline, "Add Curve");
-				spline.AddCurve();
-				EditorUtility.SetDirty(spline);
-			}
+//			if (GUILayout.Button ("Add Curve")) {
+//				Undo.RecordObject(spline, "Add Curve");
+//				spline.AddCurve();
+//				EditorUtility.SetDirty(spline);
+//			}
 		}
 
 		private void OnSceneGUI() {
 			spline = target as BezierSpline;
 			handleTransform = spline.transform;
-			handleRotation = Tools.pivotRotation == PivotRotation.Local ? handleTransform.rotation :  Quaternion.identity;
+			handleRotation = Tools.pivotRotation == PivotRotation.Local ? handleTransform.rotation : Quaternion.identity;
 
-			if (spline.ControlPointCount > 3) {
-				Vector3 p0 = ShowPoint (0);
-				for (int i = 1; i < spline.ControlPointCount; i += 3) {
-					Vector3 p1 = ShowPoint (i);
-					Vector3 p2 = ShowPoint (i + 1);
-					Vector3 p3 = ShowPoint (i + 2);
-
-					Handles.color = Color.gray;
-					Handles.DrawLine (p0, p1);
-					Handles.DrawLine (p2, p3);
-
-					Handles.DrawBezier (p0, p3, p1, p2, Color.white, null, 2f);
-					p0 = p3;
-				}
-			
-				ShowDirections ();
+			if (!spline.IsThereAPath) {
+				return;
 			}
+
+			Vector3 p0 = ShowPoint (0);
+			for (int i = 1; i < spline.ControlPointCount; i += 3) {
+				Vector3 p1 = ShowPoint (i);
+				Vector3 p2 = ShowPoint (i + 1);
+				Vector3 p3 = ShowPoint (i + 2);
+
+				Handles.color = Color.gray;
+				Handles.DrawLine (p0, p1);
+				Handles.DrawLine (p2, p3);
+
+				Handles.DrawBezier (p0, p3, p1, p2, Color.white, null, 2f);
+				p0 = p3;
+			}
+		
+			ShowDirections ();
 		}
 
 		private void ShowDirections() {
@@ -104,9 +106,16 @@ namespace DoisMundos.BezierCurves
 				if (EditorGUI.EndChangeCheck ()) {
 					Undo.RecordObject(spline, "Move Point");
 					EditorUtility.SetDirty(spline);
+
+					//TODO: Do what you need before change any point.
+					spline.DoBeforeSetControlPoint();
+					//Set the control point to a new position.
 					spline.SetControlPoint(index, handleTransform.InverseTransformPoint(point));
-					//UPDATE spline string.
-					splineString.DoUpdate();
+					//TODO: Do what you need after change any point.
+					spline.DoAfterSetControlPoint();
+
+					//Updating spline string.
+					if (splineString != null ) { splineString.DoUpdate(); }
 				}
 			}
 			
@@ -128,8 +137,8 @@ namespace DoisMundos.BezierCurves
 			BezierControlPointMode mode = (BezierControlPointMode)EditorGUILayout.EnumPopup ("Mode", spline.GetControlPointMode (selectedIndex));
 			if (EditorGUI.EndChangeCheck ()) {
 				Undo.RecordObject(spline, "Change Point Mode");
-				spline.SetControlPointMode(selectedIndex, mode);
 				EditorUtility.SetDirty(spline);
+				spline.SetControlPointMode(selectedIndex, mode);
 			}
 		}
 	}
