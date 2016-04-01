@@ -1,5 +1,7 @@
 # A beziér curve implementation made with unity (v 4.6.8) #
 
+**Unity _4.6.8_**
+
 This repository has a way to create and edit beziér splines.
 
 ### Features ###
@@ -14,4 +16,4 @@ This repository has a way to create and edit beziér splines.
 
 #### Change Log ####
 
-1.0.0 - Lines, curves and splines.
+1.0 - Lines, curves and splines.
